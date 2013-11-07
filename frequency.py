@@ -1,3 +1,8 @@
+'''
+This is the code for the "Frequent Words Problem on the BioInformatics Course site
+rosalind.info. This program first parse a text file, then find all the most frequent
+substrings of length k in a string.
+'''
 def dataParse(file_name):
 	file = open(file_name,'r')
 	data = [line.strip() for line in file.readlines()]
