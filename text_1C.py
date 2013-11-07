@@ -1,3 +1,7 @@
+'''
+ Given a specific pattern, this program finds all such patterns
+ and returns their positions in a string of text. 
+'''
 def dataParse(file_name):
 	file = open(file_name, 'r')
 	data = [line.strip() for line in file.readlines()]

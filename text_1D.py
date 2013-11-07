@@ -1,5 +1,6 @@
 '''
-This program to find common clumps in a genome represented as a string.
+This program finds the positions of all common clumps in a 
+genome represented as a string.
 '''
 
 
