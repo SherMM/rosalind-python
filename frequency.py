@@ -1,5 +1,5 @@
 '''
-This is the code for the "Frequent Words Problem on the BioInformatics Course site
+This is the code for the "Frequent Words Problem“ on the BioInformatics Course site
 rosalind.info. This program first parse a text file, then find all the most frequent
 substrings of length k in a string.
 '''
