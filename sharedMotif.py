@@ -12,8 +12,6 @@ def dataParse(file_name):
 	return dnaDict
 
 
-
-
 def motifFinder(strandDict):
 	subStrings = set()
 	strands = list(strandDict.values())
