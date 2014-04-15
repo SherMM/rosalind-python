@@ -1,3 +1,328 @@
+def BackBuild(v, w, z):
+	backtrack = [[[0 for num in range(len(z)+1)] for num in range(len(w)+1)] for num in range(len(v)+1)]
+	
+	for i in range(len(v)+1):
+		for j in range(len(w)+1):
+			for k in range(len(z)+1):
+				if i != 0:
+					if j == 0 and k == 0:
+						backtrack[i][j][k] = 4
+					elif j == 0 and k != 0:
+						backtrack[i][j][k] = 5
+					elif j != 0 and k == 0:
+						backtrack[i][j][k] = 6
+				else:
+					if j == 0 and k != 0:
+						backtrack[i][j][k] = 1
+					elif j != 0 and k == 0:
+						backtrack[i][j][k] = 2
+					elif j != 0 and k != 0:
+						backtrack[i][j][k] = 3
+	return backtrack
+					
+						
+					
+
+def MultipleLCS(v, w, z):
+	s = [[[0 for num in range(len(z)+1)] for num in range(len(w)+1)] for num in range(len(v)+1)]
+	backtrack = BackBuild(v, w, z)
+	
+	for i in range(len(z)+1):
+		s[0][0][i] = -1*i
+	for j in range(len(w)+1):
+		s[0][j][0] = -1*j
+	for k in range(len(v)+1):
+		s[k][0][0] = -1*k
+		
+	for i in range(1, len(v)+1):
+		for j in range(1, len(w)+1):
+			for k in range(1, len(z)+1):
+				down = s[i-1][j][k]
+				right = s[i][j-1][k] 
+				forward = s[i][j][k-1]
+				dr = s[i-1][j-1][k]
+				df = s[i-1][j][k-1]
+				rf = s[i][j-1][k-1]
+				if v[i-1] == w[j-1] == z[k-1]:
+					drf = s[i-1][j-1][k-1] + 1
+				else:
+					drf = s[i-1][j-1][k-1]
+				s[i][j][k] = max([down, right, forward, dr, df, rf, drf])
+				
+				if s[i][j][k] == drf:
+					backtrack[i][j][k] = 7
+				elif s[i][j][k] == rf:
+					backtrack[i][j][k] = 6
+				elif s[i][j][k] == df:
+					backtrack[i][j][k] = 5
+				elif s[i][j][k] == dr:
+					backtrack[i][j][k] = 4
+				elif s[i][j][k] == forward:
+					backtrack[i][j][k] = 3
+				elif s[i][j][k] == right:
+					backtrack[i][j][k] = 2
+				else:
+					backtrack[i][j][k] = 1
+					
+	return s, backtrack
+	
+def MultipleLCSOutput(backtrack, v, w, z, i, j, k):
+	string1 = ''
+	string2 = ''
+	string3 = ''
+	while i > 0 or j > 0 or k > 0:
+		if backtrack[i][j][k] == 1:
+			i -= 1
+			string1 += v[i]
+			string2 += '-'
+			string3 += '-'
+		elif backtrack[i][j][k] == 2:
+			j -= 1
+			string1 += '-'
+			string2 += w[j]
+			string3 += '-'
+		elif backtrack[i][j][k] == 3:
+			k -= 1
+			string1 += '-'
+			string2 += '-'
+			string3 += z[k]
+		elif backtrack[i][j][k] == 4:
+			i -= 1
+			j -= 1
+			string1 += v[i]
+			string2 += w[j]
+			string3 += '-'
+		elif backtrack[i][j][k] == 5:
+			i -= 1
+			k -= 1
+			string1 += v[i]
+			string2 += '-'
+			string3 += z[k]
+		elif backtrack[i][j][k] == 6:
+			j -= 1
+			k -= 1
+			string1 += '-'
+			string2 += w[j]
+			string3 += z[k]
+		else:
+			i -= 1
+			j -= 1
+			k -= 1
+			string1 += v[i]
+			string2 += w[j]
+			string3 += z[k]
+	return string1[::-1], string2[::-1], string3[::-1]
+
+
+def LinearSpaceAlignment(top, bottom, left, right):
+	#finish later
+	pass
+
+def MiddleEdgeAlignment(v, w, mid, score):
+	s = [[0 for num in range(len(w)+1)] for num in range(len(v)+1)]
+	backtrack = [[None for num in range(len(w)+1)] for num in range(len(v)+1)]
+	for i in range(1, len(v)+1):
+		s[i][0] = s[i-1][0] - 5
+		backtrack[i][0] = 'D---'
+	for j in range(1, len(w)+1):
+		s[0][j] =  s[0][j-1] - 5
+		backtrack[0][j] = 'R---'
+	
+	mid_scores = [s[0][mid]]
+	for i in range(1, len(v)+1):
+		for j in range(1, len(w)+1):
+			down = s[i-1][j] - 5
+			right = s[i][j-1] - 5
+			u = score[(v[i-1], w[j-1])]
+			diagonal = s[i-1][j-1] + u
+			s[i][j] = max([down, right, diagonal])
+			if j == mid:
+				mid_scores.append(s[i][j])
+			
+			if s[i][j] == diagonal:
+				backtrack[i][j] = '\\\\'
+			elif s[i][j] == right:
+				backtrack[i][j] = 'R---'
+			else:
+				backtrack[i][j] = 'D---'
+	
+	return s, backtrack, mid_scores
+	
+def MiddleEdgeFinder(v, w, score):
+	mid = len(w)/2
+	source_to_mid = MiddleEdgeAlignment(v, w, mid, score)
+	sm_backtrack = source_to_mid[1]
+	sm_scores = source_to_mid[2]
+	
+	rev_v = v[::-1]
+	rev_w = w[::-1]
+	new_mid = len(w)/2 + 1
+	mid_to_sink = MiddleEdgeAlignment(rev_v, rev_w, new_mid, score)
+	ms_backtrack = mid_to_sink[1]
+	ms_scores = mid_to_sink[2][::-1]
+	
+	max_score = -1*float("inf")
+	m_edge = (0,0)
+	for i in range(len(sm_scores)):
+		curr_max = sm_scores[i] + ms_scores[i]
+		if curr_max >= max_score:
+			max_score = curr_max
+			m_edge = (i, mid)
+	
+	i, j = m_edge[0], m_edge[1]
+	direction = sm_backtrack[i][j]
+	if direction == '\\\\':
+		s_edge = (i+1, j+1)
+	elif direction == 'R---':
+		s_edge = (i, j+1)
+	return m_edge, s_edge
+	
+
+def AffineAlignment(v, w, o_penalty, e_penalty, score):
+	s_lower = [[(-1*float("inf")) for num in range(len(w)+1)] for num in range(len(v)+1)]
+	s_middle = [[0 for num in range(len(w)+1)] for num in range(len(v)+1)]
+	s_upper = [[(-1*float("inf")) for num in range(len(w)+1)] for num in range(len(v)+1)]
+	backtrack_lower = [[None for num in range(len(w)+1)] for num in range(len(v)+1)]
+	backtrack_middle = [[None for num in range(len(w)+1)] for num in range(len(v)+1)]
+	backtrack_upper = [[None for num in range(len(w)+1)] for num in range(len(v)+1)]
+	
+	s_lower[0][0] = -1 * o_penalty
+	for i in range(1, len(v)+1):
+		s_lower[i][0] = s_lower[i-1][0] - e_penalty
+		s_middle[i][0] = s_lower[i-1][0] - e_penalty
+		backtrack_lower[i][0] = 'D---'
+		backtrack_middle[i][0] = 'DC--'
+	
+	s_upper[0][0] = -1 * o_penalty	
+	for j in range(1, len(w)+1):
+		s_upper[0][j] = s_upper[0][j-1] - e_penalty
+		s_middle[0][j] = s_upper[0][j-1] - e_penalty
+		backtrack_upper[0][j] = 'R---'
+		backtrack_middle[0][j] = 'RC--'
+		
+	max_node = -1*float("inf")
+	max_pos = (0,0)	
+	matrix = ''
+	for i in range(1, len(v)+1):
+		for j in range(1, len(w)+1):
+			lower_l = s_lower[i-1][j] - e_penalty
+			lower_m = s_middle[i-1][j] - o_penalty
+			s_lower[i][j] = max([lower_l, lower_m])
+			if s_lower[i][j] == lower_l:
+				backtrack_lower[i][j] = 'D---'
+			else:
+				backtrack_lower[i][j] = 'CD--'
+			
+			upper_u = s_upper[i][j-1] - e_penalty
+			upper_m = s_middle[i][j-1] - o_penalty
+			s_upper[i][j] = max([upper_u, upper_m])
+			if s_upper[i][j] == upper_u:
+				backtrack_upper[i][j] = 'R---'
+			else:
+				backtrack_upper[i][j] = 'CR--'
+			
+			middle_l = s_lower[i][j]
+			u = score[(v[i-1],w[j-1])]
+			middle_m = s_middle[i-1][j-1] + u
+			middle_u = s_upper[i][j]
+			s_middle[i][j] = max([middle_l, middle_m, middle_u])
+			if s_middle[i][j] == middle_l:
+				backtrack_middle[i][j] = 'DC--'
+			elif s_middle[i][j] == middle_m:
+				backtrack_middle[i][j] = '\\\\'
+			else:
+				backtrack_middle[i][j] = 'RC--'
+			
+			if i == len(v) and j == len(w):
+				lower_max = s_lower[i][j]
+				upper_max = s_upper[i][j]
+				middle_max = s_middle[i][j]
+				curr_max = max([lower_max, upper_max, middle_max])
+				if curr_max > max_node:	
+					max_node = curr_max
+					max_pos = (i,j)
+					if curr_max == lower_max:
+						matrix = 'LOWER'
+					elif curr_max == upper_max:
+						matrix = 'UPPER'
+					else:
+						matrix = 'MIDDLE'
+				
+	
+	s_matrices = s_lower, s_upper, s_middle
+	back_matrices = backtrack_lower, backtrack_upper, backtrack_middle
+	return s_matrices, back_matrices, max_node, max_pos, matrix
+	
+# works for some, but index errors when s2 longer than s1
+def AffineOutput(backtracks, s1, s2, max_pos, matrix):
+	string1 = ''
+	string2 = ''
+	i = max_pos[0]
+	j = max_pos[1]
+	b_lower = backtracks[0]
+	b_upper = backtracks[1]
+	b_middle = backtracks[2]
+	curr_mat = matrix
+	while i != 0 or j != 0:
+		if curr_mat == 'LOWER':
+			l_data = LowerBacktrack(b_lower, s1, (i,j))
+			gap = l_data[0]
+			sub = l_data[1]
+			i = l_data[2][0]
+			j = l_data[2][1]
+			string2 += gap
+			string1 += sub
+			curr_mat = 'MIDDLE'
+		elif curr_mat == 'UPPER':
+			u_data = UpperBacktrack(b_upper, s2, (i,j))
+			gap = u_data[0]
+			sub = u_data[1]
+			i = u_data[2][0]
+			j = u_data[2][1]
+			string1 += gap
+			string2 += sub
+			curr_mat = 'MIDDLE'
+		else:
+			if b_middle[i][j] == '\\\\':
+				string1 += s1[i-1]
+				string2 += s2[j-1]
+				i = i - 1
+				j = j - 1
+			elif b_middle[i][j] == 'DC--':
+				curr_mat = 'LOWER'
+			elif b_middle[i][j] == 'RC--':
+				curr_mat = 'UPPER'
+	return string1[::-1], string2[::-1]					
+	
+def LowerBacktrack(b_lower, s1, pos):
+	gap = ''
+	sub = ''
+	i = pos[0]
+	j = pos[1]
+	while b_lower[i][j] != 'CD--':
+		gap += '-'
+		i = i - 1
+		sub += s1[i]
+	gap += '-'
+	i = i - 1
+	sub += s1[i]
+	return gap, sub, (i, j)
+
+def UpperBacktrack(b_upper, s2, pos):
+	gap = ''
+	sub = ''
+	i = pos[0]
+	j = pos[1]
+	while b_upper[i][j] != 'CR--':
+		gap += '-'
+		j = j - 1
+		sub += s2[j]
+	gap += '-'
+	j = j - 1
+	sub += s2[j]
+	return gap, sub, (i, j)	
+
+
 def OverlapAlignment(v,w):
 	s = [[0 for num in range(len(w)+1)] for num in range(len(v)+1)]
 	backtrack = [[None for num in range(len(w)+1)] for num in range(len(v)+1)] 
@@ -509,3 +834,68 @@ def overlap_problem(file_name):
 	print max_node
 	print strings[0]
 	print strings[1]
+	
+def affine_problem(file_name):
+	file = open(file_name, 'r')
+	data = [line.strip() for line in file.readlines()]
+	string1 = data[0]
+	string2 = data[1]
+	o_pen = 11
+	e_pen = 1
+	score = score_matrix_parse('/Users/QuantumIan/downloads/BLOSUM62.txt')
+	aff_data = AffineAlignment(string1, string2, o_pen, e_pen, score)
+	backtracks = aff_data[1]
+	max_node = aff_data[2]
+	max_pos = aff_data[3]
+	matrix = aff_data[4]
+	strings = AffineOutput(backtracks, string1, string2, max_pos, matrix)
+	print max_node
+	print strings[0]
+	print strings[1]
+	
+def middle_edge_problem(file_name):
+	file = open(file_name, 'r')
+	data = [line.strip() for line in file.readlines()]
+	string1 = data[0]
+	string2 = data[1]
+	score = score_matrix_parse('/Users/QuantumIan/downloads/BLOSUM62.txt')
+	edges = MiddleEdgeFinder(string1, string2, score)
+	for edge in edges:
+		print edge,
+	print	
+	
+def linear_space_problem(file_name):
+	score = score_matrix_parse('/Users/QuantumIan/downloads/BLOSUM62.txt')
+	file = open(file_name, 'r')
+	data = [line.strip() for line in file.readlines()]
+	string1 = data[0]
+	string2 = data[1]
+	s_and_b = GlobalAlignment(string1, string2, score)
+	score_mat = s_and_b[0]
+	backtrack = s_and_b[1]
+	alignment = OutputGlobalLCS(backtrack, string1, string2, len(backtrack)-1, len(backtrack[0])-1)
+	print score_mat[len(backtrack)-1][len(backtrack[0])-1]
+	print alignment[0]
+	print alignment[1]
+	
+def multiple_lcs_problem(file_name):
+	file = open(file_name, 'r')
+	data = [line.strip() for line in file.readlines()]
+	string1 = data[0]
+	string2 = data[1]
+	string3 = data[2]	
+	m_data = MultipleLCS(string1, string2, string3)
+	scores = m_data[0]
+	max_score = scores[len(string1)][len(string2)][len(string3)]
+	backtrack = m_data[1]
+	strings = MultipleLCSOutput(backtrack, string1, string2, string3, len(string1), len(string2), len(string3))
+	print max_score
+	print strings[0]
+	print strings[1]
+	print strings[2]
+	
+def matrix_printer(matrix):
+	for line in matrix:
+		for l in line:
+			print l
+		print
