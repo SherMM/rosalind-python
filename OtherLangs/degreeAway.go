@@ -40,14 +40,18 @@ func readGraph (path string) map[int][]int {
 
 func degreeCounter (graph map[int][]int) []int {
 	var degrees []int
-	for i := 1; i < len(graph); i++ {
+	for i := 1; i < len(graph) + 1; i++ {
 		degrees = append(degrees, len(graph[i]))
 	}
 	return degrees
 }
 
 func main() {
-	graph := readGraph("edge_list.txt")
+	graph := readGraph("/Users/QuantumIan/downloads/rosalind_deg.txt")
 	degrees := degreeCounter(graph)
-	fmt.Println(degrees)
+	for _, dcount := range degrees {
+		fmt.Print(dcount)
+		fmt.Print(" ")
+		
+	}
 }
