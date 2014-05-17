@@ -31,12 +31,18 @@ def parse_to_node_graph(file_name):
 		# start from index one so first line specifying n 
 		# vertices and m edges is uneeded in the case 
 		# of the algorithms used to solve this problem
-		data = [tuple(map(int, line.strip().split())) for line in f.readlines()][1:]
+		data = [tuple(map(int, line.strip().split())) for line in f.readlines()]
+		# unpack first tuple which is
+		# the number of vertices and 
+		# edges in the graph
+		num_v, num_e = data[0]
+		edges = data[1:]
+		
 			
-	for x,y in data:
+	for x,y in edges:
 		d[x].append(y)
 		d[y].append(x)
-	return d
+	return d, num_v, num_e
 		
 def degreeCounter(graph):
 	degrees = []
@@ -45,8 +51,8 @@ def degreeCounter(graph):
 	return degrees
 	
 if __name__ == "__main__":
-	file_name = '/Users/QuantumIan/downloads/rosalind_deg.txt'
-	graph = parse_to_node_graph(file_name)
+	file_name = 'datasets/rosalind_deg.txt'
+	graph = parse_to_node_graph(file_name)[0]
 	degrees = degreeCounter(graph)
 	for deg in degrees:
 		print deg,
